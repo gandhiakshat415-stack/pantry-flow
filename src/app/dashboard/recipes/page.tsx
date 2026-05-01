@@ -28,9 +28,10 @@ export default function RecipesPage() {
   function handleExport() {
     if (!result || result.missing.length === 0) return;
     
-    // Generate mock deep link
-    const itemsParams = encodeURIComponent(result.missing.join(','));
-    alert(`Redirecting to: instamart://cart?items=${itemsParams}`);
+    // Create space-separated string of missing items for search
+    const searchString = result.missing.join(' ');
+    const itemsParams = encodeURIComponent(searchString);
+    window.open(`https://blinkit.com/s/?q=${itemsParams}`, '_blank');
   }
 
   return (
@@ -115,7 +116,7 @@ export default function RecipesPage() {
                   className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  Export to Qcom Cart
+                  Search Missing Items on Blinkit
                 </button>
               </div>
             )}
