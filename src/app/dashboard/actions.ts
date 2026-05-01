@@ -41,12 +41,19 @@ export async function addInventoryItem(formData: FormData) {
   return { success: true }
 }
 
-export async function updateItemStatus(item_id: string, new_status: 'full' | 'low' | 'empty') {
+export async function updateItemStatus(item_id: string, new_status: 'full' | 'low' | 'empty'): Promise<void> {
   const supabase = await createClient()
   const { profile } = await getUserProfile()
 
   if (!profile?.household_id) {
-    return { error: 'No household found' }
+    console.error('No household found')
+    return;
+  }
+
+  let itemName = '';
+  if (new_status === 'low') {
+    const { data: itemData } = await supabase.from('inventory').select('name').eq('id', item_id).single();
+    if (itemData) itemName = itemData.name;
   }
 
   const { error } = await supabase
@@ -56,19 +63,30 @@ export async function updateItemStatus(item_id: string, new_status: 'full' | 'lo
     .eq('household_id', profile.household_id)
 
   if (error) {
-    return { error: error.message }
+    console.error(error.message)
+    return;
+  }
+
+  if (new_status === 'low' && itemName) {
+    await supabase.from('requests').insert({
+      household_id: profile.household_id,
+      created_by: profile.id,
+      raw_text: itemName,
+      status: 'pending'
+    });
+    revalidatePath('/dashboard/requests')
   }
 
   revalidatePath('/dashboard')
-  return { success: true }
 }
 
-export async function deleteItem(item_id: string) {
+export async function deleteItem(item_id: string): Promise<void> {
   const supabase = await createClient()
   const { profile } = await getUserProfile()
 
   if (!profile?.household_id) {
-    return { error: 'No household found' }
+    console.error('No household found')
+    return;
   }
 
   const { error } = await supabase
@@ -78,9 +96,9 @@ export async function deleteItem(item_id: string) {
     .eq('household_id', profile.household_id)
 
   if (error) {
-    return { error: error.message }
+    console.error(error.message)
+    return;
   }
 
   revalidatePath('/dashboard')
-  return { success: true }
 }

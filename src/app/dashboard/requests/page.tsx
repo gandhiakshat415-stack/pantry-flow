@@ -1,7 +1,8 @@
 import { getUserProfile, createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import RequestForm from './RequestForm';
+import VoiceRequestInput from './VoiceRequestInput';
 import RequestStatusButtons from './RequestStatusButtons';
+import ExportRequestsButton from './ExportRequestsButton';
 
 function StatusBadge({ status }: { status: string }) {
   if (status === 'pending') {
@@ -51,7 +52,13 @@ export default async function RequestsPage() {
         <p className="mt-1 text-sm text-gray-500">Manage items requested for the household.</p>
       </div>
 
-      {isHousehelp && <RequestForm />}
+      {isHousehelp && <VoiceRequestInput />}
+
+      {isAdminOrMember && requests.filter(r => r.status !== 'fulfilled').length > 0 && (
+        <ExportRequestsButton 
+          activeItems={requests.filter(r => r.status !== 'fulfilled').map(r => r.raw_text)} 
+        />
+      )}
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         {requests.length === 0 ? (
