@@ -40,3 +40,47 @@ export async function addInventoryItem(formData: FormData) {
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+export async function updateItemStatus(item_id: string, new_status: 'full' | 'low' | 'empty') {
+  const supabase = await createClient()
+  const { profile } = await getUserProfile()
+
+  if (!profile?.household_id) {
+    return { error: 'No household found' }
+  }
+
+  const { error } = await supabase
+    .from('inventory')
+    .update({ status: new_status })
+    .eq('id', item_id)
+    .eq('household_id', profile.household_id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+export async function deleteItem(item_id: string) {
+  const supabase = await createClient()
+  const { profile } = await getUserProfile()
+
+  if (!profile?.household_id) {
+    return { error: 'No household found' }
+  }
+
+  const { error } = await supabase
+    .from('inventory')
+    .delete()
+    .eq('id', item_id)
+    .eq('household_id', profile.household_id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}

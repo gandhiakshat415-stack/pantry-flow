@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import AddItemModal from './AddItemModal';
-import { Package, AlertCircle, CheckCircle2, CircleDashed } from 'lucide-react';
+import { Package, AlertCircle, CheckCircle2, CircleDashed, Trash2 } from 'lucide-react';
+import { updateItemStatus, deleteItem } from './actions';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -67,8 +68,8 @@ export default async function DashboardPage() {
           </div>
         ) : (
           inventory.map((item) => (
-            <div key={item.id} className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 transition-all hover:shadow-md">
-              <div className="px-4 py-5 sm:p-6">
+            <div key={item.id} className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 transition-all hover:shadow-md flex flex-col">
+              <div className="px-4 py-5 sm:p-6 flex-1">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 truncate pr-2">
                     {item.name}
@@ -87,6 +88,34 @@ export default async function DashboardPage() {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-between items-center">
+                <div className="flex gap-2">
+                  <form action={updateItemStatus.bind(null, item.id, 'full')}>
+                    <button type="submit" title="Mark Full" className="w-6 h-6 rounded-full bg-green-100 text-green-700 hover:bg-green-200 flex items-center justify-center transition-colors">
+                      <span className="sr-only">Full</span>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </button>
+                  </form>
+                  <form action={updateItemStatus.bind(null, item.id, 'low')}>
+                    <button type="submit" title="Mark Low" className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200 flex items-center justify-center transition-colors">
+                      <span className="sr-only">Low</span>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    </button>
+                  </form>
+                  <form action={updateItemStatus.bind(null, item.id, 'empty')}>
+                    <button type="submit" title="Mark Empty" className="w-6 h-6 rounded-full bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center transition-colors">
+                      <span className="sr-only">Empty</span>
+                      <div className="w-3 h-3 rounded-full bg-red-500 border border-red-200"></div>
+                    </button>
+                  </form>
+                </div>
+                <form action={deleteItem.bind(null, item.id)}>
+                  <button type="submit" title="Delete Item" className="text-gray-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                    <span className="sr-only">Delete</span>
+                  </button>
+                </form>
               </div>
             </div>
           ))
